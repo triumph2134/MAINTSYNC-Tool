@@ -1,0 +1,1041 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
+    <title>MaintSync Tool Checkout SYSTEM</title>
+    <style>
+        * { box-sizing: border-box; font-family: system-ui, 'Segoe UI', 'Inter', -apple-system, sans-serif; }
+        body { background: #0f1419; margin: 0; padding: 20px; color: #e6ecf2; }
+        [data-theme="light"] body { background: #f0f4f8; color: #1f2937; }
+        .container { max-width: 1200px; margin: 0 auto; }
+        .header { display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 12px; margin-bottom: 24px; }
+        h1 { font-size: 1.8rem; font-weight: 600; background: linear-gradient(135deg, #6ec1ff, #4da3ff); -webkit-background-clip: text; background-clip: text; color: transparent; margin: 0; }
+        .badge { background: #171e26; padding: 8px 16px; border-radius: 40px; font-weight: 500; font-size: 0.85rem; cursor: pointer; border: 1px solid #252f3a; transition: 0.2s; user-select: none; }
+        .badge:hover { background: #1f2731; }
+        [data-theme="light"] .badge { background: white; border-color: #d0d7de; }
+        [data-theme="light"] .badge:hover { background: #f5f7fa; }
+        .header-actions { display: flex; align-items: center; gap: 10px; flex-wrap: wrap; }
+        .card { background: #171e26; border-radius: 24px; padding: 20px; margin-bottom: 28px; border: 1px solid #252f3a; }
+        [data-theme="light"] .card { background: white; border-color: #d0d7de; }
+        .card-title { font-size: 1.4rem; font-weight: 600; margin-bottom: 16px; display: flex; align-items: center; gap: 12px; flex-wrap: wrap; }
+        .card-title .spacer { flex: 1; }
+        .form-row { display: flex; flex-wrap: wrap; gap: 16px; margin-bottom: 20px; }
+        .form-field { flex: 1; min-width: 180px; }
+        label { font-weight: 500; font-size: 0.8rem; text-transform: uppercase; letter-spacing: 0.5px; color: #9aa4b2; display: block; margin-bottom: 6px; }
+        input, button, select { border-radius: 16px; border: 1px solid #3a4654; padding: 12px 16px; font-size: 1rem; width: 100%; background: #0f1419; color: #e6ecf2; transition: 0.2s; }
+        [data-theme="light"] input, [data-theme="light"] button, [data-theme="light"] select { background: white; color: #1f2937; border-color: #d0d7de; }
+        input:focus, select:focus { outline: none; border-color: #4da3ff; box-shadow: 0 0 0 3px rgba(77,163,255,0.2); }
+        button { background: #0f2b3d; color: white; border: none; font-weight: 600; cursor: pointer; width: auto; min-width: 120px; }
+        button:hover { filter: brightness(1.15); }
+        .scan-group { display: flex; gap: 12px; align-items: center; }
+        .scan-group input { flex: 4; }
+        .scan-group button { flex: 1; }
+        .cart-table { width: 100%; border-collapse: collapse; }
+        .cart-table th, .cart-table td { text-align: left; padding: 12px 8px; border-bottom: 1px solid #252f3a; }
+        [data-theme="light"] .cart-table th, [data-theme="light"] .cart-table td { border-bottom-color: #d0d7de; }
+        .remove-btn { background: none; border: none; color: #ff5c5c; font-size: 1.4rem; cursor: pointer; padding: 0 8px; width: auto; min-width: unset; }
+        .checkout-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(320px, 1fr)); gap: 20px; }
+        .checkout-card { background: #0f1419; border-radius: 20px; padding: 16px; border-left: 6px solid #f59e0b; transition: border-color 0.2s; }
+        [data-theme="light"] .checkout-card { background: #f8fafc; }
+        .checkout-card.overdue { border-left-color: #ff5c5c; box-shadow: 0 0 0 1px rgba(255,92,92,0.25); }
+        .checkout-card h3 { margin: 0 0 2px 0; font-size: 1.15rem; }
+        .checkout-card .dept { font-size: 0.8rem; color: #9aa4b2; margin-bottom: 12px; }
+        .checkout-card .co-time { font-size: 0.72rem; color: #6b7a8d; margin-bottom: 14px; }
+        .tools-label { font-size: 0.72rem; text-transform: uppercase; letter-spacing: 0.6px; color: #6b7a8d; margin-bottom: 6px; font-weight: 600; }
+        .tools-list { display: flex; flex-wrap: wrap; gap: 7px; margin-bottom: 16px; }
+        .tool-pill { background: #1a2535; color: #6ec1ff; font-size: 0.82rem; font-weight: 600; padding: 5px 13px; border-radius: 20px; border: 1px solid #2a3d52; word-break: break-all; }
+        [data-theme="light"] .tool-pill { background: #e8f0fb; color: #1d6fa4; border-color: #bdd0e8; }
+        .tool-pill-wrap { display: inline-flex; align-items: stretch; }
+        .tool-pill-wrap .tool-pill { border-radius: 20px 0 0 20px; border-right: none; }
+        .pill-checkin { background: #1e4a6e; color: #fff; border: 1px solid #2a3d52; border-left: none; border-radius: 0 20px 20px 0; padding: 0 12px; cursor: pointer; font-size: 0.85rem; font-weight: 700; min-width: unset; width: auto; }
+        .pill-checkin:hover { background: #265a85; }
+        [data-theme="light"] .pill-checkin { background: #1d6fa4; border-color: #bdd0e8; }
+        .checkin-btn { background: #1e4a6e; font-size: 0.85rem; padding: 10px 12px; width: 100%; }
+        .status-open { background: #fef3c7; color: #b45309; display: inline-block; padding: 4px 12px; border-radius: 30px; font-size: 0.7rem; font-weight: bold; }
+        .status-overdue { background: #7c2d2d; color: #fecaca; display: inline-block; padding: 4px 12px; border-radius: 30px; font-size: 0.7rem; font-weight: bold; }
+        .empty-state { text-align: center; padding: 40px; color: #9aa4b2; grid-column: 1 / -1; }
+        .error-box { background: rgba(255,92,92,0.1); border-left: 4px solid #ff5c5c; padding: 12px; border-radius: 16px; margin-bottom: 20px; font-size: 0.9rem; }
+        .info-box { background: rgba(77,163,255,0.1); border-left: 4px solid #4da3ff; padding: 12px; border-radius: 16px; margin-bottom: 20px; font-size: 0.9rem; display: flex; align-items: center; justify-content: space-between; gap: 12px; }
+        .info-box button { background: #4da3ff; color: #fff; border: none; padding: 6px 16px; border-radius: 20px; cursor: pointer; font-weight: 600; font-size: 0.85rem; min-width: unset; }
+
+        /* Search bar */
+        .search-bar { position: relative; margin-bottom: 16px; }
+        .search-bar input { padding-left: 40px; }
+        .search-bar::before { content: '🔍'; position: absolute; left: 14px; top: 50%; transform: translateY(-50%); pointer-events: none; font-size: 0.95rem; }
+
+        /* Header buttons */
+        .icon-btn { background: #171e26; border: 1px solid #252f3a; padding: 8px 14px; border-radius: 40px; cursor: pointer; min-width: unset; width: auto; font-size: 0.95rem; color: #e6ecf2; font-weight: 500; }
+        .icon-btn:hover { background: #1f2731; }
+        [data-theme="light"] .icon-btn { background: white; border-color: #d0d7de; color: #1f2937; }
+        [data-theme="light"] .icon-btn:hover { background: #f5f7fa; }
+
+        /* Card-action buttons (clear cart, etc.) */
+        .btn-row { display: flex; justify-content: space-between; align-items: center; margin-top: 20px; gap: 12px; flex-wrap: wrap; }
+        .btn-secondary { background: transparent; border: 1px solid #3a4654; color: #e6ecf2; }
+        [data-theme="light"] .btn-secondary { color: #1f2937; border-color: #d0d7de; }
+        .btn-danger { background: #7c2d2d; }
+
+        /* Toasts */
+        .toast-container { position: fixed; bottom: 24px; right: 24px; display: flex; flex-direction: column; gap: 10px; z-index: 9999; pointer-events: none; max-width: calc(100vw - 48px); }
+        .toast { background: #171e26; border: 1px solid #252f3a; border-left: 4px solid #4da3ff; padding: 14px 18px; border-radius: 14px; color: #e6ecf2; min-width: 240px; max-width: 380px; font-size: 0.9rem; box-shadow: 0 8px 24px rgba(0,0,0,0.4); animation: toast-in 0.25s ease-out; pointer-events: auto; }
+        .toast.success { border-left-color: #10b981; }
+        .toast.warning { border-left-color: #f59e0b; }
+        .toast.error { border-left-color: #ff5c5c; }
+        .toast.fade-out { animation: toast-out 0.3s ease-in forwards; }
+        [data-theme="light"] .toast { background: white; border-color: #d0d7de; color: #1f2937; box-shadow: 0 8px 24px rgba(0,0,0,0.15); }
+        @keyframes toast-in { from { transform: translateX(110%); opacity: 0; } to { transform: translateX(0); opacity: 1; } }
+        @keyframes toast-out { to { transform: translateX(110%); opacity: 0; } }
+
+        /* Modal */
+        .modal-backdrop { position: fixed; inset: 0; background: rgba(0,0,0,0.6); display: flex; align-items: center; justify-content: center; z-index: 10000; padding: 20px; animation: fade-in 0.2s ease-out; }
+        .modal { background: #171e26; border: 1px solid #252f3a; border-radius: 24px; padding: 28px; max-width: 460px; width: 100%; box-shadow: 0 20px 60px rgba(0,0,0,0.5); }
+        [data-theme="light"] .modal { background: white; border-color: #d0d7de; }
+        .modal h3 { margin: 0 0 12px 0; font-size: 1.25rem; }
+        .modal p { margin: 0 0 20px 0; color: #9aa4b2; line-height: 1.5; }
+        .modal-actions { display: flex; gap: 10px; justify-content: flex-end; flex-wrap: wrap; }
+        .modal-actions button { min-width: 100px; }
+        @keyframes fade-in { from { opacity: 0; } to { opacity: 1; } }
+
+        /* History */
+        .history-list { display: flex; flex-direction: column; gap: 10px; max-height: 520px; overflow-y: auto; margin-top: 12px; padding-right: 4px; }
+        .history-row { background: #0f1419; border-radius: 14px; padding: 12px 14px; border: 1px solid #252f3a; font-size: 0.88rem; }
+        [data-theme="light"] .history-row { background: #f8fafc; border-color: #d0d7de; }
+        .history-row .h-meta { color: #6b7a8d; font-size: 0.75rem; margin-top: 6px; }
+        .history-row .h-tools { margin-top: 6px; display: flex; flex-wrap: wrap; gap: 5px; }
+        .partial-tag { color: #f59e0b; font-size: 0.72rem; font-weight: 700; margin-left: 6px; }
+
+        @media (max-width: 640px) {
+            body { padding: 12px; }
+            .card { padding: 16px; }
+            .toast-container { left: 12px; right: 12px; bottom: 12px; }
+            .toast { min-width: 0; max-width: none; }
+        }
+    </style>
+</head>
+<body>
+<div class="container">
+    <div class="header">
+        <h1>🔧 MaintSync · Tool Checkout</h1>
+        <div class="header-actions">
+            <button class="icon-btn" id="exportBtn" title="Export all data to CSV">⬇ Export CSV</button>
+            <button class="icon-btn" id="settingsBtn" title="Settings">⚙️</button>
+            <div class="badge" id="folderStatus" title="Click to select or change folder">📁 Select folder…</div>
+            <div id="themeToggle" class="badge" title="Toggle dark / light mode">🌙</div>
+        </div>
+    </div>
+
+    <div id="errorBanner" style="display:none;" class="error-box"></div>
+
+    <div id="noFolderBanner" class="info-box" style="display:none;">
+        <span>💾 Data is saved in-browser only. <strong>Click "Select Folder"</strong> to also sync to a file on disk (survives clears &amp; works across sessions).</span>
+        <button id="selectFolderBtn">Select Folder</button>
+    </div>
+
+    <div class="card">
+        <div class="card-title">👤 Who is checking out?</div>
+        <div class="form-row">
+            <div class="form-field">
+                <label>Full name</label>
+                <input type="text" id="userName" list="namesList" placeholder="e.g. Alex Rivera" autocomplete="off">
+                <datalist id="namesList"></datalist>
+            </div>
+            <div class="form-field">
+                <label>Company / Department</label>
+                <input type="text" id="userDept" list="deptsList" placeholder="e.g. Maintenance, Electrical">
+                <datalist id="deptsList"></datalist>
+            </div>
+        </div>
+    </div>
+
+    <div class="card">
+        <div class="card-title">📷 Scan or enter tool</div>
+        <div class="scan-group">
+            <input type="text" id="toolBarcode" placeholder="Scan QR / barcode or type tool ID" autocomplete="off">
+            <button id="addToolBtn">➕ Add tool</button>
+        </div>
+        <p style="font-size:0.8rem; margin-top:12px; color:#9aa4b2;">
+            💡 Tip: Use tablet camera + barcode scanner input. Hit "Add tool" after each scan.
+        </p>
+        <div style="margin-top: 24px;">
+            <strong>🛒 Current cart</strong>
+            <table class="cart-table" id="cartTable">
+                <thead><tr><th>Tool ID / Barcode</th><th style="width:50px"></th></tr></thead>
+                <tbody id="cartBody"></tbody>
+            </table>
+            <div class="btn-row">
+                <button id="clearCartBtn" class="btn-secondary">🗑 Clear cart</button>
+                <button id="acceptCheckoutBtn" style="background:#0f5c3e;">✅ ACCEPT – Complete checkout</button>
+            </div>
+        </div>
+    </div>
+
+    <div class="card">
+        <div class="card-title">
+            📋 Open checkouts
+            <span class="spacer"></span>
+            <span id="openCount" style="font-size:0.85rem; color:#9aa4b2; font-weight:500;"></span>
+        </div>
+        <div class="search-bar">
+            <input type="text" id="searchInput" placeholder="Search by name, department, or tool barcode…" autocomplete="off">
+        </div>
+        <div id="openCheckoutsList" class="checkout-grid">
+            <div class="empty-state">No open checkouts</div>
+        </div>
+    </div>
+
+    <div class="card">
+        <div class="card-title">
+            📜 History
+            <span class="spacer"></span>
+            <span id="historyCount" style="font-size:0.85rem; color:#9aa4b2; font-weight:500;">0 records</span>
+            <button id="historyToggleBtn" class="btn-secondary" style="font-size:0.85rem; padding:8px 14px;">Show</button>
+        </div>
+        <div id="historyList" class="history-list" style="display:none;"></div>
+    </div>
+</div>
+
+<div class="toast-container" id="toastContainer"></div>
+
+<script>
+// =====================================================================
+//  PERSISTENCE STRATEGY
+//  Primary:   File System Access API  →  checkouts.json in user folder
+//  Fallback:  localStorage            →  always active as safety net
+//
+//  Data shape (v2):
+//    { activeCheckouts: [...], history: [...], settings: {...}, lastUpdated }
+//  Backward-compatible reads of v1 files (which were just an array of
+//  active checkouts) are handled transparently.
+// =====================================================================
+
+'use strict';
+
+// ---------- state ----------
+let activeCheckouts = [];
+let history         = [];
+let currentCart     = [];
+let settings        = { overdueHours: 8 };
+let searchQuery     = '';
+let historyExpanded = false;
+
+// ---------- DOM ----------
+const userNameInput     = document.getElementById('userName');
+const userDeptInput     = document.getElementById('userDept');
+const toolBarcodeInput  = document.getElementById('toolBarcode');
+const addToolBtn        = document.getElementById('addToolBtn');
+const acceptBtn         = document.getElementById('acceptCheckoutBtn');
+const clearCartBtn      = document.getElementById('clearCartBtn');
+const cartBody          = document.getElementById('cartBody');
+const openCheckoutsDiv  = document.getElementById('openCheckoutsList');
+const folderStatusBadge = document.getElementById('folderStatus');
+const errorBanner       = document.getElementById('errorBanner');
+const themeToggle       = document.getElementById('themeToggle');
+const noFolderBanner    = document.getElementById('noFolderBanner');
+const selectFolderBtn   = document.getElementById('selectFolderBtn');
+const searchInput       = document.getElementById('searchInput');
+const exportBtn         = document.getElementById('exportBtn');
+const settingsBtn       = document.getElementById('settingsBtn');
+const historyToggleBtn  = document.getElementById('historyToggleBtn');
+const openCountSpan     = document.getElementById('openCount');
+const historyCountSpan  = document.getElementById('historyCount');
+const namesList         = document.getElementById('namesList');
+const deptsList         = document.getElementById('deptsList');
+
+// ==========================================================
+//  INDEXEDDB – stores the FileSystemDirectoryHandle
+// ==========================================================
+const IDB = (() => {
+    try { indexedDB.deleteDatabase('ToolCheckoutDB'); } catch(e) {}
+
+    const DB_NAME = 'MaintSyncDB';
+    const STORE_NAME = 'handles';
+    let _db = null;
+
+    function open() {
+        if (_db) return Promise.resolve(_db);
+        return new Promise((resolve, reject) => {
+            const probe = indexedDB.open(DB_NAME);
+            probe.onupgradeneeded = e => { e.target.result.createObjectStore(STORE_NAME); };
+            probe.onsuccess = e => {
+                const db = e.target.result;
+                if (db.objectStoreNames.contains(STORE_NAME)) { _db = db; return resolve(_db); }
+                const nextVer = db.version + 1;
+                db.close();
+                const req = indexedDB.open(DB_NAME, nextVer);
+                req.onupgradeneeded = ev => {
+                    const d = ev.target.result;
+                    if (!d.objectStoreNames.contains(STORE_NAME)) d.createObjectStore(STORE_NAME);
+                };
+                req.onsuccess = ev => { _db = ev.target.result; resolve(_db); };
+                req.onerror = ev => reject(ev.target.error);
+            };
+            probe.onerror = e => reject(e.target.error);
+        });
+    }
+
+    async function save(handle) {
+        const db = await open();
+        return new Promise((resolve, reject) => {
+            const tx = db.transaction(STORE_NAME, 'readwrite');
+            const req = tx.objectStore(STORE_NAME).put(handle, 'dir');
+            req.onsuccess = () => resolve();
+            req.onerror = e => reject(e.target.error);
+        });
+    }
+
+    async function load() {
+        const db = await open();
+        return new Promise((resolve, reject) => {
+            const tx = db.transaction(STORE_NAME, 'readonly');
+            const req = tx.objectStore(STORE_NAME).get('dir');
+            req.onsuccess = () => resolve(req.result || null);
+            req.onerror = e => reject(e.target.error);
+        });
+    }
+
+    return { save, load };
+})();
+
+// ==========================================================
+//  DATA HELPERS – normalize legacy formats
+// ==========================================================
+function defaultState() {
+    return { activeCheckouts: [], history: [], settings: { overdueHours: 8 } };
+}
+
+function normalizeState(raw) {
+    if (!raw) return defaultState();
+    // v1: raw was just an array of activeCheckouts
+    if (Array.isArray(raw)) {
+        return { activeCheckouts: raw, history: [], settings: { overdueHours: 8 } };
+    }
+    return {
+        activeCheckouts: Array.isArray(raw.activeCheckouts) ? raw.activeCheckouts : [],
+        history:         Array.isArray(raw.history)         ? raw.history         : [],
+        settings:        Object.assign({ overdueHours: 8 }, raw.settings || {})
+    };
+}
+
+function ensureToolIds(checkouts) {
+    checkouts.forEach(co => {
+        co.tools.forEach((t, i) => {
+            if (!t.id) t.id = `tool_legacy_${co.id}_${i}_${Math.random().toString(36).substr(2,4)}`;
+        });
+    });
+}
+
+// ==========================================================
+//  FILE SYSTEM ACCESS – read/write checkouts.json
+// ==========================================================
+const FS = {
+    dirHandle: null,
+    FILE: 'checkouts.json',
+
+    supported() { return typeof window.showDirectoryPicker === 'function'; },
+
+    async pickDirectory() {
+        this.dirHandle = await window.showDirectoryPicker({ mode: 'readwrite' });
+        const perm = await this.dirHandle.requestPermission({ mode: 'readwrite' });
+        if (perm !== 'granted') throw new Error('Permission denied');
+        await IDB.save(this.dirHandle);
+        return this.dirHandle;
+    },
+
+    async read() {
+        const fh = await this.dirHandle.getFileHandle(this.FILE, { create: true });
+        const file = await fh.getFile();
+        if (file.size === 0) return defaultState();
+        const text = await file.text();
+        const data = JSON.parse(text);
+        return normalizeState(data);
+    },
+
+    async write(state) {
+        const fh = await this.dirHandle.getFileHandle(this.FILE, { create: true });
+        const writable = await fh.createWritable();
+        await writable.write(JSON.stringify({
+            activeCheckouts: state.activeCheckouts,
+            history:         state.history,
+            settings:        state.settings,
+            lastUpdated:     new Date().toISOString()
+        }, null, 2));
+        await writable.close();
+    }
+};
+
+// ==========================================================
+//  LOCAL STORAGE FALLBACK – always kept in sync
+// ==========================================================
+const LS = {
+    KEY: 'maintSync_data_v2',
+    OLD_KEY: 'maintSync_checkouts',
+    save(state) {
+        try { localStorage.setItem(this.KEY, JSON.stringify(state)); } catch(e) {}
+    },
+    load() {
+        try {
+            const raw = localStorage.getItem(this.KEY);
+            if (raw) return normalizeState(JSON.parse(raw));
+            // Migrate old key
+            const old = localStorage.getItem(this.OLD_KEY);
+            if (old) return normalizeState(JSON.parse(old));
+            return defaultState();
+        } catch(e) { return defaultState(); }
+    }
+};
+
+// ==========================================================
+//  TOAST + MODAL SYSTEM
+// ==========================================================
+function toast(msg, type = 'info', dur = 3500) {
+    const container = document.getElementById('toastContainer');
+    const t = document.createElement('div');
+    t.className = `toast ${type}`;
+    t.textContent = msg;
+    container.appendChild(t);
+    setTimeout(() => {
+        t.classList.add('fade-out');
+        setTimeout(() => t.remove(), 300);
+    }, dur);
+}
+
+function confirmModal(title, msg, opts = {}) {
+    return new Promise(resolve => {
+        const okLabel     = opts.okLabel     || 'Confirm';
+        const cancelLabel = opts.cancelLabel || 'Cancel';
+        const dangerCls   = opts.danger ? 'btn-danger' : '';
+
+        const backdrop = document.createElement('div');
+        backdrop.className = 'modal-backdrop';
+        backdrop.innerHTML = `
+            <div class="modal" role="dialog" aria-modal="true">
+                <h3>${escapeHtml(title)}</h3>
+                <p>${escapeHtml(msg)}</p>
+                <div class="modal-actions">
+                    <button class="btn-secondary" data-act="cancel">${escapeHtml(cancelLabel)}</button>
+                    <button class="${dangerCls}" data-act="ok">${escapeHtml(okLabel)}</button>
+                </div>
+            </div>
+        `;
+        document.body.appendChild(backdrop);
+        const close = (val) => { backdrop.remove(); resolve(val); };
+        backdrop.querySelector('[data-act=cancel]').onclick = () => close(false);
+        backdrop.querySelector('[data-act=ok]').onclick     = () => close(true);
+        backdrop.addEventListener('click', e => { if (e.target === backdrop) close(false); });
+        // Esc to cancel
+        const onKey = e => { if (e.key === 'Escape') { close(false); document.removeEventListener('keydown', onKey); } };
+        document.addEventListener('keydown', onKey);
+    });
+}
+
+// ==========================================================
+//  FOLDER STATUS UI
+// ==========================================================
+function setStatus(text) { folderStatusBadge.textContent = text; }
+
+function showError(msg) {
+    errorBanner.style.display = 'block';
+    errorBanner.innerHTML = `⚠️ ${escapeHtml(msg)}`;
+    setTimeout(() => { errorBanner.style.display = 'none'; }, 6000);
+}
+
+// ==========================================================
+//  CONNECT TO FOLDER (gesture-safe)
+// ==========================================================
+async function connectFolder() {
+    if (!FS.supported()) {
+        showError('Folder access not supported in this browser. Use Chrome or Edge 86+.');
+        return false;
+    }
+    try {
+        setStatus('📂 Selecting…');
+        await FS.pickDirectory();
+        await FS.write(currentState());
+        setStatus('✅ Folder linked');
+        noFolderBanner.style.display = 'none';
+        toast('Folder linked successfully', 'success');
+        return true;
+    } catch (e) {
+        if (e.name === 'AbortError') {
+            setStatus(FS.dirHandle ? '✅ Folder linked' : '📁 No folder');
+        } else {
+            console.error(e);
+            showError('Could not link folder: ' + e.message);
+            setStatus('⚠️ Error');
+        }
+        return false;
+    }
+}
+
+let _pendingHandle = null;
+
+async function tryReconnect() {
+    if (!FS.supported()) {
+        setStatus('❌ Not supported');
+        noFolderBanner.style.display = 'flex';
+        return false;
+    }
+    try {
+        const saved = await IDB.load();
+        if (!saved) {
+            setStatus('📁 Select folder…');
+            noFolderBanner.style.display = 'flex';
+            return false;
+        }
+        const perm = await saved.queryPermission({ mode: 'readwrite' });
+        if (perm === 'granted') {
+            FS.dirHandle = saved;
+            setStatus('✅ Folder linked');
+            noFolderBanner.style.display = 'none';
+            try {
+                const fileState = await FS.read();
+                const lsState   = LS.load();
+                applyState(pickWinner(fileState, lsState));
+            } catch(e) {
+                applyState(LS.load());
+            }
+            return true;
+        } else {
+            FS.dirHandle = null;
+            setStatus('🔒 Click to re-link folder');
+            noFolderBanner.style.display = 'flex';
+            _pendingHandle = saved;
+            return false;
+        }
+    } catch(e) {
+        console.warn('Reconnect check failed:', e);
+        setStatus('📁 Select folder…');
+        noFolderBanner.style.display = 'flex';
+        return false;
+    }
+}
+
+async function connectFolderOrResume() {
+    if (!FS.supported()) {
+        showError('Folder access not supported. Use Chrome or Edge 86+.');
+        return;
+    }
+    if (_pendingHandle && !FS.dirHandle) {
+        try {
+            setStatus('🔑 Requesting access…');
+            const perm = await _pendingHandle.requestPermission({ mode: 'readwrite' });
+            if (perm === 'granted') {
+                FS.dirHandle = _pendingHandle;
+                _pendingHandle = null;
+                await IDB.save(FS.dirHandle);
+                try {
+                    const fileState = await FS.read();
+                    const lsState   = LS.load();
+                    applyState(pickWinner(fileState, lsState));
+                    await FS.write(currentState());
+                } catch(e) { /* keep what we have */ }
+                renderAll();
+                setStatus('✅ Folder re-linked');
+                noFolderBanner.style.display = 'none';
+                toast('Folder re-linked', 'success');
+                return;
+            }
+        } catch(e) {
+            console.warn('Resume failed, opening picker', e);
+        }
+    }
+    const ok = await connectFolder();
+    if (ok) {
+        try {
+            const fileState = await FS.read();
+            const lsState   = LS.load();
+            applyState(pickWinner(fileState, lsState));
+            await FS.write(currentState());
+        } catch(e) { /* in-memory */ }
+        renderAll();
+    }
+}
+
+// Pick the state with more total records (active + history)
+function pickWinner(a, b) {
+    const aTotal = a.activeCheckouts.length + a.history.length;
+    const bTotal = b.activeCheckouts.length + b.history.length;
+    return aTotal >= bTotal ? a : b;
+}
+
+function applyState(s) {
+    activeCheckouts = s.activeCheckouts;
+    history         = s.history;
+    settings        = s.settings;
+    ensureToolIds(activeCheckouts);
+}
+
+function currentState() {
+    return { activeCheckouts, history, settings };
+}
+
+// ==========================================================
+//  SAVE – writes to both FS and LS
+// ==========================================================
+async function saveAll() {
+    const state = currentState();
+    LS.save(state);
+    if (FS.dirHandle) {
+        try {
+            await FS.write(state);
+            return true;
+        } catch(e) {
+            console.error('FS write failed:', e);
+            showError('Folder write failed – data saved in browser. Re-link folder via badge.');
+            setStatus('⚠️ Write error');
+            noFolderBanner.style.display = 'flex';
+            FS.dirHandle = null;
+            return false;
+        }
+    }
+    return true;
+}
+
+// ==========================================================
+//  UI RENDERING
+// ==========================================================
+function escapeHtml(str) {
+    if (str === null || str === undefined) return '';
+    return String(str).replace(/[&<>"']/g, m => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[m]));
+}
+
+function renderAll() {
+    renderCart();
+    renderOpenCheckouts();
+    renderHistory();
+    updateAutocompleteData();
+}
+
+function renderCart() {
+    if (currentCart.length === 0) {
+        cartBody.innerHTML = '<tr><td colspan="2" style="text-align:center;color:#94a3b8;">Cart empty – scan or add tools</td></tr>';
+        clearCartBtn.style.display = 'none';
+        return;
+    }
+    clearCartBtn.style.display = '';
+    cartBody.innerHTML = currentCart.map((tool, idx) => `
+        <tr>
+            <td>🔹 ${escapeHtml(tool.barcode)}</td>
+            <td><button class="remove-btn" data-index="${idx}" title="Remove from cart">✖</button></td>
+        </tr>
+    `).join('');
+    document.querySelectorAll('.remove-btn').forEach(btn => {
+        btn.addEventListener('click', () => {
+            currentCart.splice(parseInt(btn.dataset.index), 1);
+            renderCart();
+        });
+    });
+}
+
+function isOverdue(co) {
+    const elapsedH = (Date.now() - new Date(co.checkoutTime).getTime()) / 3600000;
+    return elapsedH >= settings.overdueHours;
+}
+
+function getFilteredCheckouts() {
+    if (!searchQuery.trim()) return activeCheckouts;
+    const q = searchQuery.trim().toLowerCase();
+    return activeCheckouts.filter(co =>
+        (co.userName    && co.userName.toLowerCase().includes(q)) ||
+        (co.userCompany && co.userCompany.toLowerCase().includes(q)) ||
+        co.tools.some(t => t.barcode.toLowerCase().includes(q))
+    );
+}
+
+function renderOpenCheckouts() {
+    const filtered = getFilteredCheckouts();
+    const overdueCount = activeCheckouts.filter(isOverdue).length;
+    openCountSpan.textContent = activeCheckouts.length === 0
+        ? ''
+        : `${activeCheckouts.length} open${overdueCount ? ` · ${overdueCount} overdue` : ''}`;
+
+    if (!activeCheckouts.length) {
+        openCheckoutsDiv.innerHTML = '<div class="empty-state">✅ No open checkouts – all tools are in</div>';
+        return;
+    }
+    if (!filtered.length) {
+        openCheckoutsDiv.innerHTML = '<div class="empty-state">No checkouts match your search</div>';
+        return;
+    }
+
+    openCheckoutsDiv.innerHTML = filtered.map(co => {
+        const overdue = isOverdue(co);
+        const elapsedH = (Date.now() - new Date(co.checkoutTime).getTime()) / 3600000;
+        const elapsedStr = elapsedH < 1 ? `${Math.round(elapsedH * 60)}m ago` : `${elapsedH.toFixed(1)}h ago`;
+        return `
+        <div class="checkout-card ${overdue ? 'overdue' : ''}">
+            <div style="display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:2px;gap:8px;">
+                <h3>${escapeHtml(co.userName)}</h3>
+                <span class="${overdue ? 'status-overdue' : 'status-open'}">${overdue ? '⚠ OVERDUE' : 'OPEN'}</span>
+            </div>
+            <div class="dept">${escapeHtml(co.userCompany)}</div>
+            <div class="tools-label">🔧 Tools (${co.tools.length})</div>
+            <div class="tools-list">
+                ${co.tools.map(t => `
+                    <span class="tool-pill-wrap">
+                        <span class="tool-pill">${escapeHtml(t.barcode)}</span>
+                        <button class="pill-checkin" data-coid="${escapeHtml(co.id)}" data-tid="${escapeHtml(t.id || t.barcode)}" title="Check in this tool">✓</button>
+                    </span>
+                `).join('')}
+            </div>
+            <div class="co-time">Checked out ${new Date(co.checkoutTime).toLocaleString()} · ${elapsedStr}</div>
+            <button class="checkin-btn" data-id="${escapeHtml(co.id)}">🔁 Check in all tools</button>
+        </div>
+        `;
+    }).join('');
+
+    document.querySelectorAll('.checkin-btn').forEach(btn => {
+        btn.addEventListener('click', () => checkinAll(btn.dataset.id));
+    });
+    document.querySelectorAll('.pill-checkin').forEach(btn => {
+        btn.addEventListener('click', () => checkinTool(btn.dataset.coid, btn.dataset.tid));
+    });
+}
+
+function renderHistory() {
+    historyCountSpan.textContent = `${history.length} record${history.length === 1 ? '' : 's'}`;
+    historyToggleBtn.textContent = historyExpanded ? 'Hide' : 'Show';
+    const list = document.getElementById('historyList');
+    if (!historyExpanded) { list.style.display = 'none'; return; }
+    list.style.display = 'flex';
+    if (!history.length) {
+        list.innerHTML = '<div class="empty-state" style="padding:20px;">No history yet</div>';
+        return;
+    }
+    list.innerHTML = history.slice(0, 200).map(h => {
+        const durH = (new Date(h.checkinTime) - new Date(h.checkoutTime)) / 3600000;
+        return `
+        <div class="history-row">
+            <div>
+                <strong>${escapeHtml(h.userName)}</strong>
+                <span style="color:#9aa4b2;">· ${escapeHtml(h.userCompany)}</span>
+                ${h.partial ? '<span class="partial-tag">PARTIAL</span>' : ''}
+            </div>
+            <div class="h-tools">
+                ${h.tools.map(t => `<span class="tool-pill">${escapeHtml(t.barcode)}</span>`).join('')}
+            </div>
+            <div class="h-meta">
+                Checked in ${new Date(h.checkinTime).toLocaleString()} · was out ${durH.toFixed(1)}h
+            </div>
+        </div>`;
+    }).join('');
+}
+
+function updateAutocompleteData() {
+    const names = new Set();
+    const depts = new Set();
+    [...activeCheckouts, ...history].forEach(c => {
+        if (c.userName)    names.add(c.userName);
+        if (c.userCompany) depts.add(c.userCompany);
+    });
+    namesList.innerHTML = [...names].sort().map(n => `<option value="${escapeHtml(n)}">`).join('');
+    deptsList.innerHTML = [...depts].sort().map(d => `<option value="${escapeHtml(d)}">`).join('');
+}
+
+// ==========================================================
+//  CART + CHECKOUT FLOW
+// ==========================================================
+function findToolInCheckouts(barcode) {
+    for (const co of activeCheckouts) {
+        if (co.tools.find(t => t.barcode === barcode)) return co;
+    }
+    return null;
+}
+
+async function addToolToCart() {
+    const barcode = toolBarcodeInput.value.trim();
+    if (!barcode) return;
+
+    // Duplicate-in-cart guard
+    if (currentCart.find(t => t.barcode === barcode)) {
+        toast(`"${barcode}" is already in this cart`, 'warning');
+        toolBarcodeInput.value = '';
+        toolBarcodeInput.focus();
+        return;
+    }
+
+    // Already-checked-out guard
+    const existing = findToolInCheckouts(barcode);
+    if (existing) {
+        toolBarcodeInput.value = '';
+        const ok = await confirmModal(
+            'Tool already checked out',
+            `"${barcode}" is currently checked out by ${existing.userName} (${existing.userCompany}). Add it to this cart anyway?`,
+            { okLabel: 'Add anyway', danger: true }
+        );
+        if (!ok) { toolBarcodeInput.focus(); return; }
+    }
+
+    currentCart.push({
+        id: 'tool_' + Date.now() + '_' + Math.random().toString(36).substr(2, 6),
+        barcode,
+        timestamp: new Date().toISOString()
+    });
+    renderCart();
+    toolBarcodeInput.value = '';
+    toolBarcodeInput.focus();
+}
+
+async function clearCart() {
+    if (currentCart.length === 0) return;
+    const ok = await confirmModal('Clear cart?', `Remove all ${currentCart.length} tools from the cart? The checkout will not be saved.`, { okLabel: 'Clear cart', danger: true });
+    if (!ok) return;
+    currentCart = [];
+    renderCart();
+    toast('Cart cleared', 'info');
+}
+
+async function performCheckout() {
+    const userName    = userNameInput.value.trim();
+    const userCompany = userDeptInput.value.trim();
+    if (!userName || !userCompany) {
+        toast('Please enter both Name and Company/Department', 'warning');
+        return;
+    }
+    if (currentCart.length === 0) {
+        toast('No tools in cart – scan at least one tool', 'warning');
+        return;
+    }
+
+    const newCheckout = {
+        id:           'chk_' + Date.now() + '_' + Math.random().toString(36).substr(2, 6),
+        userName,
+        userCompany,
+        tools:        [...currentCart],
+        checkoutTime: new Date().toISOString()
+    };
+    activeCheckouts.push(newCheckout);
+    await saveAll();
+    currentCart = [];
+    renderCart();
+    userNameInput.value = '';
+    userDeptInput.value = '';
+    renderOpenCheckouts();
+    updateAutocompleteData();
+    toast(`✅ ${newCheckout.tools.length} tool${newCheckout.tools.length === 1 ? '' : 's'} checked out to ${userName}`, 'success');
+}
+
+// ==========================================================
+//  CHECK-IN (partial + full)
+// ==========================================================
+async function checkinTool(checkoutId, toolId) {
+    const co = activeCheckouts.find(c => c.id === checkoutId);
+    if (!co) return;
+    const tool = co.tools.find(t => (t.id || t.barcode) === toolId);
+    if (!tool) return;
+
+    const willBeEmpty = co.tools.length === 1;
+
+    history.unshift({
+        id:           'hist_' + Date.now() + '_' + Math.random().toString(36).substr(2, 6),
+        checkoutId:   co.id,
+        userName:     co.userName,
+        userCompany:  co.userCompany,
+        tools:        [tool],
+        checkoutTime: co.checkoutTime,
+        checkinTime:  new Date().toISOString(),
+        partial:      !willBeEmpty
+    });
+
+    co.tools = co.tools.filter(t => (t.id || t.barcode) !== toolId);
+    if (co.tools.length === 0) {
+        activeCheckouts = activeCheckouts.filter(c => c.id !== checkoutId);
+    }
+
+    await saveAll();
+    renderOpenCheckouts();
+    renderHistory();
+    toast(`Checked in "${tool.barcode}"`, 'success');
+}
+
+async function checkinAll(checkoutId) {
+    const co = activeCheckouts.find(c => c.id === checkoutId);
+    if (!co) return;
+    const ok = await confirmModal(
+        'Check in all tools?',
+        `This will check in all ${co.tools.length} tools for ${co.userName}.`,
+        { okLabel: 'Check in all' }
+    );
+    if (!ok) return;
+
+    history.unshift({
+        id:           'hist_' + Date.now() + '_' + Math.random().toString(36).substr(2, 6),
+        checkoutId:   co.id,
+        userName:     co.userName,
+        userCompany:  co.userCompany,
+        tools:        [...co.tools],
+        checkoutTime: co.checkoutTime,
+        checkinTime:  new Date().toISOString(),
+        partial:      false
+    });
+
+    const count = co.tools.length;
+    activeCheckouts = activeCheckouts.filter(c => c.id !== checkoutId);
+    await saveAll();
+    renderOpenCheckouts();
+    renderHistory();
+    toast(`Checked in ${count} tool${count === 1 ? '' : 's'} for ${co.userName}`, 'success');
+}
+
+// ==========================================================
+//  CSV EXPORT
+// ==========================================================
+function csvEscape(v) {
+    return `"${String(v == null ? '' : v).replace(/"/g, '""')}"`;
+}
+
+function exportCSV() {
+    const rows = [['Status', 'User', 'Department', 'Tool Barcode', 'Checkout Time', 'Check-in Time', 'Hours Out']];
+    activeCheckouts.forEach(co => {
+        const hrs = ((Date.now() - new Date(co.checkoutTime).getTime()) / 3600000).toFixed(2);
+        co.tools.forEach(t => {
+            rows.push(['OPEN', co.userName, co.userCompany, t.barcode, new Date(co.checkoutTime).toLocaleString(), '', hrs]);
+        });
+    });
+    history.forEach(h => {
+        const hrs = ((new Date(h.checkinTime) - new Date(h.checkoutTime)) / 3600000).toFixed(2);
+        h.tools.forEach(t => {
+            rows.push(['CHECKED IN', h.userName, h.userCompany, t.barcode, new Date(h.checkoutTime).toLocaleString(), new Date(h.checkinTime).toLocaleString(), hrs]);
+        });
+    });
+
+    if (rows.length === 1) { toast('Nothing to export yet', 'warning'); return; }
+
+    const csv = rows.map(r => r.map(csvEscape).join(',')).join('\n');
+    const blob = new Blob([csv], { type: 'text/csv;charset=utf-8;' });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = `maintsync_export_${new Date().toISOString().slice(0, 10)}.csv`;
+    document.body.appendChild(a);
+    a.click();
+    document.body.removeChild(a);
+    URL.revokeObjectURL(url);
+    toast(`Exported ${rows.length - 1} rows to CSV`, 'success');
+}
+
+// ==========================================================
+//  SETTINGS MODAL
+// ==========================================================
+function openSettings() {
+    const backdrop = document.createElement('div');
+    backdrop.className = 'modal-backdrop';
+    backdrop.innerHTML = `
+        <div class="modal" role="dialog" aria-modal="true">
+            <h3>⚙️ Settings</h3>
+            <div style="margin-bottom: 18px;">
+                <label>Overdue threshold (hours)</label>
+                <input type="number" id="overdueInput" min="1" max="720" step="1" value="${settings.overdueHours}">
+                <p style="font-size:0.8rem; color:#9aa4b2; margin:8px 0 0;">Open checkouts older than this will be flagged in red as overdue.</p>
+            </div>
+            <div style="margin-bottom: 18px;">
+                <label>Clear all history</label>
+                <button id="clearHistBtn" class="btn-danger" style="margin-top:6px;">🗑 Delete ${history.length} history record${history.length === 1 ? '' : 's'}</button>
+            </div>
+            <div class="modal-actions">
+                <button class="btn-secondary" data-act="cancel">Cancel</button>
+                <button data-act="save">Save</button>
+            </div>
+        </div>
+    `;
+    document.body.appendChild(backdrop);
+    const close = () => backdrop.remove();
+    backdrop.querySelector('[data-act=cancel]').onclick = close;
+    backdrop.querySelector('[data-act=save]').onclick = async () => {
+        const val = parseInt(backdrop.querySelector('#overdueInput').value, 10);
+        if (val > 0 && val <= 720) {
+            settings.overdueHours = val;
+            await saveAll();
+            renderOpenCheckouts();
+            toast('Settings saved', 'success');
+        } else {
+            toast('Threshold must be between 1 and 720 hours', 'warning');
+            return;
+        }
+        close();
+    };
+    backdrop.querySelector('#clearHistBtn').onclick = async () => {
+        close();
+        const ok = await confirmModal('Clear all history?', `This will permanently delete all ${history.length} history records. This cannot be undone.`, { okLabel: 'Delete all', danger: true });
+        if (!ok) return;
+        history = [];
+        await saveAll();
+        renderHistory();
+        toast('History cleared', 'info');
+    };
+    backdrop.addEventListener('click', e => { if (e.target === backdrop) close(); });
+}
+
+// ==========================================================
+//  THEME
+// ==========================================================
+function initTheme() {
+    const saved = localStorage.getItem('theme');
+    if (saved === 'light') document.documentElement.setAttribute('data-theme', 'light');
+    const update = () => {
+        const light = document.documentElement.getAttribute('data-theme') === 'light';
+        themeToggle.textContent = light ? '☀️' : '🌙';
+    };
+    update();
+    themeToggle.addEventListener('click', () => {
+        const light = document.documentElement.getAttribute('data-theme') === 'light';
+        if (light) {
+            document.documentElement.removeAttribute('data-theme');
+            localStorage.setItem('theme', 'dark');
+        } else {
+            document.documentElement.setAttribute('data-theme', 'light');
+            localStorage.setItem('theme', 'light');
+        }
+        update();
+    });
+}
+
+// ==========================================================
+//  INIT
+// ==========================================================
+async function init() {
+    initTheme();
+
+    // Load from localStorage first for instant render
+    applyState(LS.load());
+    renderAll();
+
+    // Then try silent FS reconnect (may upgrade data from file)
+    await tryReconnect();
+    renderAll();
+
+    // Folder badge / banner
+    folderStatusBadge.addEventListener('click', connectFolderOrResume);
+    selectFolderBtn.addEventListener('click',   connectFolderOrResume);
+
+    // Cart + checkout
+    addToolBtn.addEventListener('click', addToolToCart);
+    acceptBtn.addEventListener('click',  performCheckout);
+    clearCartBtn.addEventListener('click', clearCart);
+    toolBarcodeInput.addEventListener('keypress', e => { if (e.key === 'Enter') addToolToCart(); });
+
+    // Search
+    searchInput.addEventListener('input', e => {
+        searchQuery = e.target.value;
+        renderOpenCheckouts();
+    });
+
+    // Header actions
+    exportBtn.addEventListener('click', exportCSV);
+    settingsBtn.addEventListener('click', openSettings);
+
+    // History toggle
+    historyToggleBtn.addEventListener('click', () => {
+        historyExpanded = !historyExpanded;
+        renderHistory();
+    });
+
+    // Auto-refresh "elapsed time" + overdue status every minute
+    setInterval(() => renderOpenCheckouts(), 60000);
+}
+
+init();
+</script>
+</body>
+</html>
